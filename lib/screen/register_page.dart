@@ -1,50 +1,25 @@
-import 'package:chatting_app/screen/home_page.dart';
-import 'package:chatting_app/screen/register_page.dart';
+import 'package:chatting_app/screen/login_page.dart';
 import 'package:chatting_app/widgets/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final formKey = GlobalKey<FormState>();
   String email = '';
   String sandi = '';
+  String fullname = '';
   RegExp regExp = RegExp(
       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
-  _login() async {
-    try {
-      _firebaseAuth
-          .signInWithEmailAndPassword(email: email, password: sandi)
-          .then((value) => Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => HomePage())));
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Login Success'),
-      ));
-    } catch (e) {
-      SnackBar(
-        content: Text(e.toString()),
-      );
-    }
-  }
-
-  void validation() {
-    final FormState form = formKey.currentState!;
-    if (form.validate()) {
-      _login();
-    } else {
-      print("no");
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,13 +44,40 @@ class _LoginPageState extends State<LoginPage> {
                   height: 10,
                 ),
                 const Text(
-                  "Login now to see what they are talking!",
+                  "Create Your Account Now & Let's Explore",
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                Image.asset("assets/images/login.png"),
+                Image.asset("assets/images/register.png"),
+                TextFormField(
+                  decoration: textInputDecoration.copyWith(
+                    labelText: "Nama Lengkap",
+                    prefixIcon: Icon(
+                      Icons.person,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Kolom nama tidak boleh kosong";
+                    } else if (value.length < 8) {
+                      return "nama terlalu pendek";
+                    } else {
+                      return null;
+                    }
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      fullname = value;
+                      print(fullname);
+                    });
+                  },
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
                 TextFormField(
                   decoration: textInputDecoration.copyWith(
                     labelText: "Email",
@@ -131,10 +133,10 @@ class _LoginPageState extends State<LoginPage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      validation();
+                      //validation();
                     },
                     child: Text(
-                      "Login",
+                      "Register",
                       style: TextStyle(color: Colors.black),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -149,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 Text.rich(
                   TextSpan(
-                    text: "Belum memiliki akun?",
+                    text: "Sudah memiliki akun?",
                     children: <TextSpan>[
                       TextSpan(
                           text: " Daftar Disini",
@@ -158,7 +160,7 @@ class _LoginPageState extends State<LoginPage> {
                               decoration: TextDecoration.underline),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              nextScreen(context, const RegisterPage());
+                              nextScreen(context, const LoginPage());
                             }),
                     ],
                     style: TextStyle(color: Colors.black, fontSize: 14),
