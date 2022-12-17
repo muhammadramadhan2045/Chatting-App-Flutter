@@ -27,21 +27,21 @@ class _LoginPageState extends State<LoginPage> {
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  _login() async {
-    try {
-      _firebaseAuth
-          .signInWithEmailAndPassword(email: email, password: sandi)
-          .then((value) => Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => HomePage())));
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Login Success'),
-      ));
-    } catch (e) {
-      SnackBar(
-        content: Text(e.toString()),
-      );
-    }
-  }
+  // _login() async {
+  //   try {
+  //     _firebaseAuth
+  //         .signInWithEmailAndPassword(email: email, password: sandi)
+  //         .then((value) => Navigator.of(context).pushReplacement(
+  //             MaterialPageRoute(builder: (context) => HomePage())));
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //       content: Text('Login Success'),
+  //     ));
+  //   } catch (e) {
+  //     SnackBar(
+  //       content: Text(e.toString()),
+  //     );
+  //   }
+  // }
 
   // void validation() {
   //   final FormState form = formKey.currentState!;
@@ -203,7 +203,8 @@ class _LoginPageState extends State<LoginPage> {
           //saving the value to shared preference state
           await HelperFunctions.saveUserLoggedInStatus(true);
           await HelperFunctions.saveUserEmailSF(email);
-          await HelperFunctions.saveUserNameSF(snapshot.docs[0]["fullname"]);
+          await HelperFunctions.saveUserNameSF(snapshot.docs[0]["fullName"]);
+          nextScreenReplace(context, const HomePage());
         } else {
           showSnackbar(context, Colors.red, value);
           setState(() {
