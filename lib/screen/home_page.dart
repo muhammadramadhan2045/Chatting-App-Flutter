@@ -4,6 +4,7 @@ import 'package:chatting_app/screen/profile_page.dart';
 import 'package:chatting_app/screen/search_page.dart';
 import 'package:chatting_app/services/auth_service.dart';
 import 'package:chatting_app/services/database_service.dart';
+import 'package:chatting_app/widgets/group_tile.dart';
 import 'package:chatting_app/widgets/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -21,11 +22,21 @@ class _HomePageState extends State<HomePage> {
   String email = "";
   Stream? groups;
   bool _isLoading = false;
+  String groupName = "";
 
   @override
   void initState() {
     super.initState();
     getUserData();
+  }
+
+  //String manipulation to get data group from firestore
+  String getId(String res) {
+    return res.substring(0, res.indexOf("_"));
+  }
+
+  String getName(String res) {
+    return res.substring(res.indexOf("_") + 1);
   }
 
   getUserData() async {
@@ -184,33 +195,80 @@ class _HomePageState extends State<HomePage> {
 
   popUpDialog(BuildContext context) {
     return showDialog(
-        barrierDismissible: true,
+        barrierDismissible: false,
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: Text(
-              "Buat grup",
-              textAlign: TextAlign.left,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _isLoading == true
-                    ? Center(
-                        child: CircularProgressIndicator(
-                            color: Theme.of(context).primaryColor),
-                      )
-                    : TextField(
-                        decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: Theme.of(context).primaryColor),
-                              borderRadius: BorderRadius.circular(20)),
-                        ),
-                      )
+          return StatefulBuilder(builder: (context, setState) {
+            return AlertDialog(
+              title: const Text(
+                "Buat grup",
+                textAlign: TextAlign.left,
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _isLoading == true
+                      ? Center(
+                          child: CircularProgressIndicator(
+                              color: Theme.of(context).primaryColor),
+                        )
+                      : TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              groupName = value;
+                            });
+                          },
+                          style: const TextStyle(color: Colors.black),
+                          decoration: InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                                borderRadius: BorderRadius.circular(20)),
+                            errorBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(color: Colors.red),
+                                borderRadius: BorderRadius.circular(20)),
+                            focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                                borderRadius: BorderRadius.circular(20)),
+                          ),
+                        )
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Batal"),
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (groupName.isNotEmpty || groupName != "") {
+                      setState(() {
+                        _isLoading = true;
+                      });
+                      DatabaseService(
+                              uid: FirebaseAuth.instance.currentUser!.uid)
+                          .createGroup(userName,
+                              FirebaseAuth.instance.currentUser!.uid, groupName)
+                          .whenComplete(() {
+                        _isLoading = false;
+                      });
+                      Navigator.of(context).pop();
+                      showSnackbar(
+                          context, Colors.green, "Grup berhasil dibuat");
+                    }
+                  },
+                  child: const Text("Buat"),
+                  style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor),
+                ),
               ],
-            ),
-          );
+            );
+          });
         });
   }
 
@@ -222,7 +280,17 @@ class _HomePageState extends State<HomePage> {
         if (snapshot.hasData) {
           if (snapshot.data['groups'] != null) {
             if (snapshot.data['groups'].length != 0) {
-              return Text("hello");
+              return ListView.builder(
+                itemCount: snapshot.data['groups'].length,
+                itemBuilder: (context, index) {
+                  int reverseIndex = snapshot.data['groups'].length - index - 1;
+                  return GroupTile(
+                      userName: snapshot.data["fullName"],
+                      groupId: getId(snapshot.data["groups"][reverseIndex]),
+                      groupName:
+                          getName(snapshot.data["groups"][reverseIndex]));
+                },
+              );
             } else {
               return noGroupWidget();
             }
