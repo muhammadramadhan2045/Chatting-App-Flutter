@@ -141,6 +141,9 @@ class _RegisterPageState extends State<RegisterPage> {
                           });
                         },
                       ),
+                      const SizedBox(
+                        height: 15,
+                      ),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(

@@ -140,6 +140,9 @@ class _LoginPageState extends State<LoginPage> {
                           });
                         },
                       ),
+                      const SizedBox(
+                        height: 15,
+                      ),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
